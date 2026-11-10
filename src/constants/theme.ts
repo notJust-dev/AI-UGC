@@ -1,65 +1,73 @@
-/**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://unistyl.es/), etc.
- */
-
 import '@/global.css';
 
 import { Platform } from 'react-native';
 
+/** Design tokens. One accent (violet) for primary actions; everything else is neutral. */
 export const Colors = {
   light: {
-    text: '#000000',
-    background: '#ffffff',
-    backgroundElement: '#F0F0F3',
-    backgroundSelected: '#E0E1E6',
-    textSecondary: '#60646C',
+    text: '#0B0B0F',
+    textSecondary: '#5B5E66',
+    textTertiary: '#8D9099',
+    background: '#F6F6F8',
+    surface: '#FFFFFF',
+    surfaceMuted: '#ECECF0',
+    border: 'rgba(11,11,15,0.08)',
+    accent: '#6D4AFF',
+    accentSoft: 'rgba(109,74,255,0.12)',
+    onAccent: '#FFFFFF',
+    success: '#16A34A',
+    warning: '#D97706',
+    danger: '#DC2626',
+    scrim: 'rgba(0,0,0,0.45)',
+    glassFallback: 'rgba(255,255,255,0.82)',
   },
   dark: {
-    text: '#ffffff',
-    background: '#000000',
-    backgroundElement: '#212225',
-    backgroundSelected: '#2E3135',
-    textSecondary: '#B0B4BA',
+    text: '#F5F5F7',
+    textSecondary: '#A1A3AB',
+    textTertiary: '#6E7079',
+    background: '#0B0B0F',
+    surface: '#16161C',
+    surfaceMuted: '#1F1F27',
+    border: 'rgba(255,255,255,0.08)',
+    accent: '#8B6DFF',
+    accentSoft: 'rgba(139,109,255,0.18)',
+    onAccent: '#FFFFFF',
+    success: '#22C55E',
+    warning: '#F59E0B',
+    danger: '#F87171',
+    scrim: 'rgba(0,0,0,0.55)',
+    glassFallback: 'rgba(22,22,28,0.82)',
   },
 } as const;
 
-export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
+export type ThemeColors = { [K in keyof typeof Colors.light]: string };
 
 export const Fonts = Platform.select({
-  ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
-    sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
-    serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
-    rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
-    mono: 'ui-monospace',
-  },
-  default: {
-    sans: 'normal',
-    serif: 'serif',
-    rounded: 'normal',
-    mono: 'monospace',
-  },
-  web: {
-    sans: 'var(--font-display)',
-    serif: 'var(--font-serif)',
-    rounded: 'var(--font-rounded)',
-    mono: 'var(--font-mono)',
-  },
+  ios: { sans: 'system-ui', rounded: 'ui-rounded', mono: 'ui-monospace' },
+  web: { sans: 'var(--font-display)', rounded: 'var(--font-rounded)', mono: 'var(--font-mono)' },
+  default: { sans: 'normal', rounded: 'normal', mono: 'monospace' },
 });
 
 export const Spacing = {
   half: 2,
   one: 4,
   two: 8,
-  three: 16,
-  four: 24,
-  five: 32,
-  six: 64,
+  three: 12,
+  four: 16,
+  five: 20,
+  six: 24,
+  eight: 32,
+  ten: 40,
 } as const;
 
-export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
-export const MaxContentWidth = 800;
+export const Radius = {
+  sm: 10,
+  md: 14,
+  lg: 20,
+  xl: 28,
+  pill: 999,
+} as const;
+
+/** Width at which layouts switch to regular (two-pane, wider grids): Duo open, tablets, desktop. */
+export const REGULAR_WIDTH = 700;
+export const MaxContentWidth = 1100;
