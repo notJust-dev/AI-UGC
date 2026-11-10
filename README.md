@@ -1,56 +1,46 @@
-# Welcome to your Expo app 👋
+# AIUGC
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+AI UGC video generator for iOS, Android and web. Expo SDK 58 + Expo Router, Convex (database, storage, server logic), Clerk (auth), RevenueCat (credits as a virtual currency, paywalls), fal.ai (images and video), Claude (prompt enhancement).
 
-## Get started
+## How a generation works
 
-1. Install dependencies
+1. `generations.create` (mutation) validates settings against `convex/lib/models.ts`, which is the only source of prices, then stores the generation as `charging`.
+2. `billing.charge` spends the credits in RevenueCat in one atomic call (`Idempotency-Key: spend:<generationId>`). RevenueCat rejects the spend and takes nothing if the balance is short.
+3. `pipeline.prepare` asks Claude for a first-frame prompt and a video prompt, then fans out one job per variation.
+4. `falNode.startVideo` composes a 9:16 first frame with Nano Banana (using avatar and product photos as references), then submits image-to-video to the fal queue with a signed webhook.
+5. `/fal/webhook` verifies fal's Ed25519 signature, then `falNode.finalizeVideo` copies the mp4 into Convex storage.
+6. A failed variation is refunded exactly once (`refund:<videoId>`). `watchdog.sweep` runs every minute and retries stuck steps, polls for lost webhooks and times out stuck renders.
 
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **src/app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Run it
 
 ```bash
-npm run reset-project
+npm install
+npx convex dev          # backend (keep running)
+npx expo start          # Metro for iOS, Android and web
+npx expo run:ios        # first time, or after native changes
+npx expo run:android
 ```
 
-This command will move the starter code to the **example** directory and create a blank **src/app** directory where you can start developing.
+## Configuration
 
-### Other setup steps
+Convex environment (`npx convex env set NAME value`):
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+| Name | Purpose |
+|---|---|
+| `CLERK_JWT_ISSUER_DOMAIN` | Clerk Frontend API URL |
+| `FAL_KEY` | fal.ai API key |
+| `ANTHROPIC_API_KEY` | Claude API key |
+| `REVENUECAT_SECRET_KEY` | RevenueCat v2 secret key (customer purchases + configuration read/write) |
+| `REVENUECAT_PROJECT_ID` | RevenueCat project id |
+| `REVENUECAT_WEBHOOK_SECRET` | Shared secret for `/revenuecat/webhook` |
 
-## Learn more
+App (`.env.local`): `EXPO_PUBLIC_CONVEX_URL`, `EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY`, `EXPO_PUBLIC_REVENUECAT_TEST_KEY` (dev builds only), `EXPO_PUBLIC_REVENUECAT_IOS_KEY`, `EXPO_PUBLIC_REVENUECAT_ANDROID_KEY`.
 
-To learn more about developing your project with Expo, look at the following resources:
+## Seed the catalog
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+```bash
+npx convex run seed:avatars           # 4 public AI creators (~$0.25 on fal)
+npx convex run seed:templates         # 2 inspiration videos (~$2.50 on fal)
+npx convex run seed:status            # wait until both are "completed"
+npx convex run seed:publishTemplates
+```
