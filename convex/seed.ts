@@ -137,6 +137,12 @@ export const recentVideos = internalQuery({
   },
 });
 
+/** Dev helper: upload URL for pushing a test file into storage from the CLI. */
+export const devUploadUrl = internalMutation({
+  args: {},
+  handler: async (ctx) => ctx.storage.generateUploadUrl(),
+});
+
 /** Dev helper: URL of a stored file (e.g. a generated test product photo). */
 export const storageUrl = internalQuery({
   args: { id: v.id("_storage") },

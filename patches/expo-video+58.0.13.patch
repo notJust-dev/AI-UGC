@@ -1,0 +1,62 @@
+diff --git a/node_modules/expo-video/ios/VideoView.swift b/node_modules/expo-video/ios/VideoView.swift
+index 152c74e..8fee8bf 100644
+--- a/node_modules/expo-video/ios/VideoView.swift
++++ b/node_modules/expo-video/ios/VideoView.swift
+@@ -11,13 +11,42 @@ public final class VideoView: ExpoView, AVPlayerViewControllerDelegate {
+ 
+   weak var player: VideoPlayer? {
+     didSet {
++      let previousController = playerViewController
+       if playerViewControllerWrapper.setPlayer(player) {
+         removeFirstFrameObserver()
+         addFirstFrameObserver()
++        // [aiugc patch] The controller was rebuilt: move view-controller containment to the new one.
++        detachFromParent(previousController)
++        attachToParentIfNeeded()
+       }
+     }
+   }
+ 
++  // [aiugc patch] On iOS 27, an AVPlayerViewController whose view is embedded without
++  // view-controller containment keeps playing audio but stops presenting new video frames
++  // (the picture only refreshes on pause or layout changes). Register it as a child of the
++  // React view controller that hosts this view.
++  private func attachToParentIfNeeded() {
++    #if !os(tvOS)
++    let controller = playerViewController
++    guard window != nil, controller.parent == nil, let parent = reactViewController() else {
++      return
++    }
++    parent.addChild(controller)
++    controller.didMove(toParent: parent)
++    #endif
++  }
++
++  private func detachFromParent(_ controller: UIViewController) {
++    #if !os(tvOS)
++    guard controller.parent != nil else {
++      return
++    }
++    controller.willMove(toParent: nil)
++    controller.removeFromParent()
++    #endif
++  }
++
+   #if os(tvOS)
+   var wasPlaying: Bool = false
+   let startPictureInPictureAutomatically = false
+@@ -169,8 +198,14 @@ public final class VideoView: ExpoView, AVPlayerViewControllerDelegate {
+     // TV is doing a normal view controller present, so we should not execute
+     // this code
+     #if !os(tvOS)
++    if self.window != nil {
++      attachToParentIfNeeded()
++    }
+     playerViewController.beginAppearanceTransition(self.window != nil, animated: true)
+     playerViewController.endAppearanceTransition()
++    if self.window == nil {
++      detachFromParent(playerViewController)
++    }
+     #endif
+   }
+ 
