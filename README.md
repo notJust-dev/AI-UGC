@@ -36,6 +36,10 @@ Convex environment (`npx convex env set NAME value`):
 
 App (`.env.local`): `EXPO_PUBLIC_CONVEX_URL`, `EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY`, `EXPO_PUBLIC_REVENUECAT_TEST_KEY` (dev builds only), `EXPO_PUBLIC_REVENUECAT_IOS_KEY`, `EXPO_PUBLIC_REVENUECAT_ANDROID_KEY`.
 
+## Test account (development instance only)
+
+Clerk test user: `aiugc+clerk_test@example.com`. Addresses containing `+clerk_test` never receive email; enter the fixed verification code `424242` on the code screen. RevenueCat Test Store purchases work with this account in development builds.
+
 ## Seed the catalog
 
 ```bash
