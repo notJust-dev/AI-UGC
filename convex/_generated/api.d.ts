@@ -28,6 +28,7 @@ import type * as pipeline from "../pipeline.js";
 import type * as products from "../products.js";
 import type * as seed from "../seed.js";
 import type * as templates from "../templates.js";
+import type * as users from "../users.js";
 import type * as videos from "../videos.js";
 import type * as watchdog from "../watchdog.js";
 import type * as webhooks from "../webhooks.js";
@@ -59,6 +60,7 @@ declare const fullApi: ApiFromModules<{
   products: typeof products;
   seed: typeof seed;
   templates: typeof templates;
+  users: typeof users;
   videos: typeof videos;
   watchdog: typeof watchdog;
   webhooks: typeof webhooks;

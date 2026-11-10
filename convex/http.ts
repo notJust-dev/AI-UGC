@@ -59,9 +59,11 @@ http.route({
   path: "/revenuecat/webhook",
   method: "POST",
   handler: httpAction(async (ctx, req) => {
+    // Shared secret, sent either as the Authorization header or as ?token= in the URL.
     const secret = process.env.REVENUECAT_WEBHOOK_SECRET;
     const auth = req.headers.get("authorization") ?? "";
-    if (!secret || (auth !== secret && auth !== `Bearer ${secret}`)) {
+    const token = new URL(req.url).searchParams.get("token");
+    if (!secret || (auth !== secret && auth !== `Bearer ${secret}` && token !== secret)) {
       return new Response("unauthorized", { status: 401 });
     }
     const body = (await req.json().catch(() => null)) as {

@@ -5,6 +5,7 @@ import { AuthHero } from '@/components/auth-hero';
 import { Spacing } from '@/constants/theme';
 import { useLayout } from '@/hooks/use-layout';
 import { useTheme } from '@/hooks/use-theme';
+import { clerkAppearance } from '@/lib/clerk-appearance';
 
 export default function SignInWeb() {
   const t = useTheme();
@@ -17,10 +18,7 @@ export default function SignInWeb() {
         <AuthHero compact={!isRegular} />
       </View>
       <View style={styles.form}>
-        <SignIn
-          routing="hash"
-          appearance={{ variables: { colorPrimary: t.accent, borderRadius: '14px' } }}
-        />
+        <SignIn routing="hash" appearance={clerkAppearance(t)} />
         {/* Required by Clerk bot protection on web sign-up. */}
         <View nativeID="clerk-captcha" />
       </View>

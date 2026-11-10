@@ -1,5 +1,5 @@
 import { useAuth, useUser } from '@clerk/expo';
-import { useAction, useQuery } from 'convex/react';
+import { useAction, useMutation, useQuery } from 'convex/react';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useState } from 'react';
@@ -15,6 +15,7 @@ import { Radius, Spacing } from '@/constants/theme';
 import { usePaywall } from '@/hooks/use-buy-credits';
 import { useLayout } from '@/hooks/use-layout';
 import { useTheme } from '@/hooks/use-theme';
+import { errorMessage } from '@/lib/errors';
 import { purchasesSupported, restorePurchases, resetPurchases } from '@/lib/purchases';
 
 export default function ProfileScreen() {
@@ -27,6 +28,7 @@ export default function ProfileScreen() {
   const products = useQuery(api.products.listMine);
   const paywall = usePaywall();
   const syncCredits = useAction(api.credits.sync);
+  const deleteMyData = useMutation(api.users.deleteMyData);
   const [restoring, setRestoring] = useState(false);
 
   const email = user?.primaryEmailAddress?.emailAddress;
@@ -44,6 +46,30 @@ export default function ProfileScreen() {
     Alert.alert('Sign out?', undefined, [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Sign out', style: 'destructive', onPress: go },
+    ]);
+  };
+
+  const confirmDelete = () => {
+    const message =
+      'This permanently deletes your account, videos, avatars and products. Remaining credits are lost. This can’t be undone.';
+    const go = async () => {
+      try {
+        await deleteMyData();
+        await resetPurchases();
+        await user?.delete();
+      } catch (e) {
+        const msg = errorMessage(e, "Couldn't delete your account. Please try again.");
+        if (Platform.OS === 'web') window.alert(msg);
+        else Alert.alert('Not deleted', msg);
+      }
+    };
+    if (Platform.OS === 'web') {
+      if (window.confirm(`Delete your account?\n\n${message}`)) go();
+      return;
+    }
+    Alert.alert('Delete your account?', message, [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Delete account', style: 'destructive', onPress: go },
     ]);
   };
 
@@ -145,6 +171,7 @@ export default function ProfileScreen() {
 
           <ListGroup>
             <ListRow icon="logout" title="Sign out" destructive onPress={confirmSignOut} testID="sign-out" />
+            <ListRow icon="trash" title="Delete account" destructive onPress={confirmDelete} testID="delete-account" />
           </ListGroup>
         </View>
       </View>

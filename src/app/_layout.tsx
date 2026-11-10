@@ -34,10 +34,10 @@ function RootNavigator() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       {/* Gate on Convex auth (not just Clerk) so queries never run before the token. */}
-      <Stack.Protected guard={isAuthenticated}>
+      <Stack.Protected guard={isAuthenticated} redirectTo="/sign-in">
         <Stack.Screen name="(app)" />
       </Stack.Protected>
-      <Stack.Protected guard={!isAuthenticated}>
+      <Stack.Protected guard={!isAuthenticated} redirectTo="/">
         <Stack.Screen name="(auth)" />
       </Stack.Protected>
     </Stack>
