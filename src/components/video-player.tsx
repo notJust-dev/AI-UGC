@@ -22,11 +22,11 @@ export function VideoPlayer({
   const height = (width * 16) / 9;
   return (
     <View style={[styles.frame, { width, height, backgroundColor: t.surfaceMuted }]}>
-      {url ? (
-        <Player key={url} url={url} />
-      ) : posterUrl ? (
+      {/* Poster stays underneath so there's no blank frame while the video loads. */}
+      {posterUrl ? (
         <Image source={posterUrl} style={StyleSheet.absoluteFill} contentFit="cover" />
       ) : null}
+      {url ? <Player key={url} url={url} /> : null}
       {overlay ? <View style={[StyleSheet.absoluteFill, styles.overlay]}>{overlay}</View> : null}
     </View>
   );

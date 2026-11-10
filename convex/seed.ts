@@ -118,6 +118,31 @@ export const templates = internalAction({
   },
 });
 
+/** Dev helper: a user's most recent videos with their billing state. */
+export const recentVideos = internalQuery({
+  args: { userId: v.string() },
+  handler: async (ctx, { userId }) => {
+    const rows = await ctx.db
+      .query("videos")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .order("desc")
+      .take(5);
+    return rows.map((r) => ({
+      videoId: r._id,
+      status: r.status,
+      creditsCost: r.creditsCost,
+      refundState: r.refundState,
+      error: r.error ?? null,
+    }));
+  },
+});
+
+/** Dev helper: URL of a stored file (e.g. a generated test product photo). */
+export const storageUrl = internalQuery({
+  args: { id: v.id("_storage") },
+  handler: async (ctx, { id }) => ctx.storage.getUrl(id),
+});
+
 /** Shows the state of every system video. */
 export const status = internalQuery({
   args: {},

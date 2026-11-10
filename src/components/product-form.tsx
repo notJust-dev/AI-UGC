@@ -49,6 +49,7 @@ export function ProductForm({
   return (
     <ScrollView
       style={{ backgroundColor: t.background }}
+      contentInsetAdjustmentBehavior="automatic"
       contentContainerStyle={styles.content}
       keyboardShouldPersistTaps="handled">
       <Text variant="body" tone="secondary">
@@ -56,7 +57,15 @@ export function ProductForm({
         script, and the photos keep the packaging accurate.
       </Text>
       <Field label="Name">
-        <Input testID="product-name" value={name} onChangeText={setName} placeholder="e.g. GlowUp Vitamin C Serum" maxLength={60} />
+        <Input
+          testID="product-name"
+          value={name}
+          onChangeText={setName}
+          placeholder="e.g. GlowUp Vitamin C Serum"
+          maxLength={60}
+          autoCorrect={false}
+          autoCapitalize="words"
+        />
       </Field>
       <Field label="Description" hint="What it is, who it's for, and the one benefit to highlight.">
         <Input

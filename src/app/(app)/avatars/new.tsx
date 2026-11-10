@@ -51,6 +51,7 @@ export default function NewAvatarScreen() {
   return (
     <ScrollView
       style={{ backgroundColor: t.background }}
+      contentInsetAdjustmentBehavior="automatic"
       contentContainerStyle={styles.content}
       keyboardShouldPersistTaps="handled">
       <Text variant="body" tone="secondary">
@@ -59,7 +60,15 @@ export default function NewAvatarScreen() {
       </Text>
 
       <Field label="Name">
-        <Input testID="avatar-name" value={name} onChangeText={setName} placeholder="e.g. Me, Alex" maxLength={60} />
+        <Input
+          testID="avatar-name"
+          value={name}
+          onChangeText={setName}
+          placeholder="e.g. Me, Alex"
+          maxLength={60}
+          autoCorrect={false}
+          autoCapitalize="words"
+        />
       </Field>
 
       <Field label="Photos" hint="Face clearly visible, no sunglasses or heavy filters.">

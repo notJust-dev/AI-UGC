@@ -175,7 +175,7 @@ export default function VideoScreen() {
         {video.status === 'failed' ? (
           <View style={[styles.notice, { backgroundColor: t.surface, borderColor: t.border }]}>
             <Text variant="callout">{video.error ?? 'Rendering failed.'}</Text>
-            {video.refunded ? (
+            {video.refunded && !/refunded/i.test(video.error ?? '') ? (
               <Text variant="caption" tone="secondary">
                 Credits for this video were refunded.
               </Text>
