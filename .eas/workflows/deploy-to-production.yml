@@ -1,0 +1,101 @@
+# Ships every push to main.
+#
+# 1. Fingerprint the native layer (native deps, config plugins, app.json, patches...).
+# 2. Look for an existing production build with that exact fingerprint.
+# 3a. Found  -> the native code is unchanged: publish an over-the-air EAS Update
+#               to the "production" branch (no store review needed).
+# 3b. Missing -> native code changed: make a new production build and submit it
+#               to App Store Connect / Google Play.
+#
+# Add [eas skip] to a commit message to skip this workflow.
+name: Deploy to production
+
+on:
+  push:
+    branches: ['main']
+
+jobs:
+  fingerprint:
+    name: Fingerprint
+    type: fingerprint
+    # Must match the build profile's environment so hashes line up with builds.
+    environment: production
+
+  get_android_build:
+    name: Check for existing Android build
+    needs: [fingerprint]
+    type: get-build
+    params:
+      fingerprint_hash: ${{ needs.fingerprint.outputs.android_fingerprint_hash }}
+      profile: production
+      platform: android
+      # A build with this fingerprint already running (earlier push) counts as existing.
+      wait_for_in_progress: true
+
+  get_ios_build:
+    name: Check for existing iOS build
+    needs: [fingerprint]
+    type: get-build
+    params:
+      fingerprint_hash: ${{ needs.fingerprint.outputs.ios_fingerprint_hash }}
+      profile: production
+      platform: ios
+      wait_for_in_progress: true
+
+  # ---------- native changes: full build + store submission ----------
+
+  build_android:
+    name: Build Android
+    needs: [get_android_build]
+    if: ${{ !needs.get_android_build.outputs.build_id }}
+    type: build
+    params:
+      platform: android
+      profile: production
+
+  build_ios:
+    name: Build iOS
+    needs: [get_ios_build]
+    if: ${{ !needs.get_ios_build.outputs.build_id }}
+    type: build
+    params:
+      platform: ios
+      profile: production
+
+  submit_android_build:
+    name: Submit to Google Play
+    needs: [build_android]
+    type: submit
+    params:
+      build_id: ${{ needs.build_android.outputs.build_id }}
+      profile: production
+
+  submit_ios_build:
+    name: Submit to App Store Connect
+    needs: [build_ios]
+    type: submit
+    params:
+      build_id: ${{ needs.build_ios.outputs.build_id }}
+      profile: production
+
+  # ---------- JS-only changes: over-the-air update ----------
+
+  publish_android_update:
+    name: Publish Android update
+    needs: [get_android_build]
+    if: ${{ needs.get_android_build.outputs.build_id }}
+    type: update
+    environment: production
+    params:
+      branch: production
+      platform: android
+
+  publish_ios_update:
+    name: Publish iOS update
+    needs: [get_ios_build]
+    if: ${{ needs.get_ios_build.outputs.build_id }}
+    type: update
+    environment: production
+    params:
+      branch: production
+      platform: ios

@@ -60,13 +60,28 @@
           "photosPermission": "AIUGC saves the videos you generate to your photo library.",
           "savePhotosPermission": "AIUGC saves the videos you generate to your photo library.",
           "isAccessMediaLocationEnabled": false,
-          "granularPermissions": ["photo", "video"]
+          "granularPermissions": [
+            "photo",
+            "video"
+          ]
         }
       ]
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "owner": "notjustdev",
+    "extra": {
+      "eas": {
+        "projectId": "86ac8fe2-21a7-4aed-be4e-3a06e69eb06a"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "fingerprint"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/86ac8fe2-21a7-4aed-be4e-3a06e69eb06a"
     }
   }
 }
